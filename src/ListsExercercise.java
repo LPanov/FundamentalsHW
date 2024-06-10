@@ -1,9 +1,14 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import java.util.Arrays;
-//import java.util.stream.*;
+import java.util.Collections;
+import java.util.List;
 
 public class ListsExercercise {
+
+    public Scanner scanner = new Scanner(System.in);
+
     public void train(){
         Scanner scanner = new Scanner(System.in);
         int[] nums = Arrays
@@ -39,69 +44,54 @@ public class ListsExercercise {
         }
         scanner.close();
     }
-    public void changeList(){
-        Scanner scanner = new Scanner(System.in);
-        int[] nums = Arrays
-                .stream(scanner.nextLine().split(" "))
-                .mapToInt(e -> Integer.parseInt(e))
-                .toArray();
-        ArrayList<Integer> numbers = new ArrayList<Integer>();
-        for(int i = 0; i < nums.length; i++){
-            numbers.add(nums[i]);
-        }
-        while(true){
-            String s = scanner.nextLine();
-            int num = 0;
-            int position = 0;
-            if(s.equals("end")){
-                for(int i = 0; i < numbers.size(); i++){
-                    System.out.print(numbers.get(i)+" ");
-                }
-                break;
-            } else if(s.startsWith("Delete ")){
-                num = Integer.parseInt(s.substring(7, s.length()));
-                for(int i = 0; i< numbers.size(); i++){
-                    if(numbers.get(i) == num) numbers.remove(i);
-                }
-            } else if(s.startsWith("Insert ")){
-                s = s.replaceFirst(" ", "");
-                num = Integer.parseInt(s.substring(6, s.indexOf(" ")));
-                position = Integer.parseInt(s.substring(s.indexOf(" ")+1, s.length()));
-                numbers.add(position, num);
-            }  
-            }
-        scanner.close();
 
+    public void changeList(){
+        List<Integer> numbers = Arrays.stream(scanner.nextLine().split(" ")).
+                                        map(Integer::parseInt).
+                                        collect(Collectors.toList());
+        while (true) {
+            String line = scanner.nextLine();
+            if (line.equals("end")) break;
+
+            String[] tokens = line.split(" ");
+            if(tokens[0].equals("Delete")){
+                numbers.removeIf(n -> n == Integer.parseInt(tokens[1]));
+            }
+            else if (tokens[0].equals("Insert")) {
+                numbers.add(Integer.parseInt(tokens[2]), Integer.parseInt(tokens[1]));
+            }
+        }
+
+        System.out.println(numbers.toString().replaceAll("[\\[\\],]", ""));
+    }
+
+    private boolean inList (String name, List<String> list)  {
+        boolean isInList = false;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(name)) isInList = true;
+        }
+        return isInList;
     }
     public void houseParty(){
-        Scanner scanner = new Scanner(System.in);
         int N = Integer.parseInt(scanner.nextLine());
-        ArrayList<String> guests = new ArrayList<String>();
-
-        while(N>0){
-            String s = scanner.nextLine();
-            s = s.replaceFirst(" ", "");
-            if(s.contains("not")){
-                if(guests.contains(s.substring(0, s.indexOf("is")))){
-                    guests.remove(s.substring(0, s.indexOf("is")));
-                } else{
-                    System.out.println(s.substring(0, s.indexOf("is")) + " is not in the list!");
-                }
-            } else {
-                if(!guests.contains(s.substring(0, s.indexOf("is")))){
-                    guests.add(s.substring(0, s.indexOf("is")));
-                } else{
-                    System.out.println(s.substring(0, s.indexOf("is")) + " is already in the list!");
-                }
+        List<String> guests = new ArrayList<String> ();
+        for (int i = 0; i < N; i++) {
+            String input = scanner.nextLine();
+            String[] tokens = input.split(" ");
+            if (tokens[2].equals("going!")) {
+                if (inList(tokens[0], guests)) System.out.println(tokens[0] + " is already in the list!");
+                else guests.add(tokens[0]);
             }
-            N--;
+            else if (tokens[2].equals("not")) {
+                if (inList(tokens[0], guests)) guests.remove(tokens[0]);
+                else System.out.println(tokens[0] + " is not in the list!");
+            }
         }
-        for(int i = 0; i < guests.size(); i++){
-            System.out.println(guests.get(i));
+        for (String names : guests) {
+            System.out.println(names);
         }
-
-        scanner.close();
     }
+
     public void listOperators(){
         Scanner scanner = new Scanner(System.in);
         int[] nums = Arrays
@@ -149,60 +139,40 @@ public class ListsExercercise {
 
         scanner.close();
     }
-    public int cSN = 0;
-    public ArrayList<Integer> bombNumbers(){
-        Scanner scanner = new Scanner(System.in);
-        int[] nums = Arrays
-                .stream(scanner.nextLine().split(" "))
-                .mapToInt(e -> Integer.parseInt(e))
-                .toArray();
-        ArrayList<Integer> numbers = new ArrayList<Integer>();
-        for(int i = 0; i < nums.length; i++){
-            numbers.add(nums[i]);
-        }
-        int[] specNums = Arrays
-                .stream(scanner.nextLine().split(" "))
-                .mapToInt(e -> Integer.parseInt(e))
-                .toArray();
-        int index = 0;
-        
-        for(int k = 0; k < numbers.size(); k++){
-            if(numbers.get(k) == specNums[0] && numbers.get(k+1) != numbers.get(k)){
-                cSN++;
-            }
-        }
-        while(cSN > 0){
-        for(int k = 0; k < numbers.size(); k++){
-            if(numbers.get(k) == specNums[0]){
-                index = k;
-            }
-        }
-        numbers.remove(index);
-        for(int j = 0; j < specNums[1]; j++){
-            try{
-            numbers.remove(index);
-            } catch(IndexOutOfBoundsException e){
-                continue;
-            }
-        }
-        for(int t = 0; t < specNums[1]; t++){
-            try{
-            numbers.remove(index-1);
-            index--;
-            } catch(IndexOutOfBoundsException e){
-                continue;
-            }
-        }   
 
-        cSN--;
+    public void bombNumbers(){
+        List<Integer> numbers = Arrays.stream(scanner.nextLine().split(" ")).
+                                        map(Integer::parseInt).
+                                        collect(Collectors.toList());
+        int[] bombNumber = Arrays.stream(scanner.nextLine().split(" "))
+                            .mapToInt(e -> Integer.parseInt(e))
+                            .toArray();
+      
+        while (true) {
+            int count = 0;
+            for (int i = 0; i < numbers.size(); i++) {
+                if (numbers.get(i) == bombNumber[0]) {
+                    count++;
+                }
+            }
+            if(count == 0) break;
+
+            if(bombNumber[1] >= 0) {
+                for(int i = 1; i <= bombNumber[1]; i++) {
+                    if (numbers.indexOf(bombNumber[0]) - i >= 0) numbers.set(numbers.indexOf(bombNumber[0]) - i, 0);
+                    if (numbers.indexOf(bombNumber[0]) + i < numbers.size()) numbers.set(numbers.indexOf(bombNumber[0]) + i, 0);
+                }
+                numbers.set(numbers.indexOf(bombNumber[0]), 0);
+            }
+        }
+            System.out.println(sum(numbers));
+            // System.out.println(numbers.toString().replaceAll("[\\[\\],]", ""));
     }
-        scanner.close();
-        return numbers;
-    }
-    public int sum(ArrayList<Integer> m){
+
+    private int sum(List<Integer> m){
         int sum = 0;
-        for(int i = 0; i < m.size(); i++)
-            sum += m.get(i);
+        for(int n : m)
+            sum += n;
         return sum;
     }
 
@@ -261,22 +231,162 @@ public class ListsExercercise {
         }
         scanner.close();
     }
-    /*public void appendArrays(){
-        Scanner scanner = new Scanner(System.in);
-        Stream<String> nums = Arrays.stream(scanner.nextLine().split("|"));
-        ArrayList<Integer> numbers1 = new ArrayList<Integer>();
-        ArrayList<Object> numbers2 = new ArrayList<Object>();
-        ArrayList<Object> numbers3 = new ArrayList<Object>();
-        int i =0;
-        
-        nums.forEach(s -> System.out.print(s)); 
-        scanner.close();
+    public void appendArrays () {
+        List<String> numbers = Arrays.stream(scanner.nextLine().split("\\|")).
+                                        map(String::valueOf).
+                                        collect(Collectors.toList());
+        List<Integer> digits = new ArrayList<Integer>();
+        Collections.reverse(numbers);
+        for (String nums : numbers) {
+            for (int j = 0; j < nums.length(); j++){
+                if (Character.isDigit(nums.charAt(j))) digits.add(Integer.parseInt(String.valueOf(nums.charAt(j))));
+            }
+        }
+        System.out.println(digits.toString().replaceAll("[\\[\\],]", ""));
+    }
+    public String[] split(String src, int len) {
+        String[] result = new String[(int)Math.ceil((double)src.length()/(double)len)];
+        for (int i=0; i<result.length; i++)
+            result[i] = src.substring(i*len, Math.min(src.length(), (i+1)*len));
+        return result;
+    }
+    public void anonymousThreat () {
+        List<String> input = Arrays.stream(scanner.nextLine().split(" ")).collect(Collectors.toList());
+        while(true) {
+            String s = scanner.nextLine();
+            if(s.equals("3:1")) break;
 
-    }*/
+            String[] command = s.split(" ");
+            if(command[0].equals("merge")){
+                try {
+                    int index = Integer.parseInt(command[1]);
+                    for (int i = 0; i < Integer.parseInt(command[2]) - index; i++){
+                        input.set(index, input.get(index).concat(input.get(index+1)));
+                        input.remove(index+1);
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    continue;
+                }
+            }
+            else if (command[0].equals("divide")) {
+                int index = Integer.parseInt(command[1]);
+                String word = input.get(index);
+                String[] splitted = split(word, word.length()/Integer.parseInt(command[2]));
+                for (int i = 0; i < splitted.length; i++) {
+                    input.add(splitted[i]);
+                }
+                input.remove(word);
+            }
+        }
+        System.out.println(input.toString().replaceAll("[\\[\\],]", ""));
+    }
+
+    private List<Integer> raiseDecrease (List<Integer> input, int index) {
+        for (int i = 0; i < input.size(); i++) {
+            if (input.get(i) <= input.get(index) && i != index) input.set(i, input.get(i) + input.get(index));
+            else if (input.get(i) > input.get(index) && i != index) input.set(i, input.get(i) - input.get(index));
+        }
+        return input;
+    }
+    private List<Integer> raiseDecreaseSpecial (List<Integer> input, int value) {
+        for (int i = 0; i < input.size(); i++) {
+            if (input.get(i) <= value) input.set(i, input.get(i) + value);
+            else if (input.get(i) > value) input.set(i, input.get(i) - value);
+        }
+        return input;
+    }
+    public void pokemonDontGo () {
+        List<Integer> numbers = Arrays.stream(scanner.nextLine().split(" ")).
+                                        map(Integer::parseInt).
+                                        collect(Collectors.toList());
+        int sum = 0;
+        while (!numbers.isEmpty()) {
+            int index = Integer.parseInt(scanner.nextLine());
+            if (index > numbers.size() - 1) {
+                int incDec = numbers.get(numbers.size() - 1);
+                sum += incDec;
+                numbers.set(numbers.size() - 1, numbers.get(0));
+                numbers = raiseDecreaseSpecial(numbers, incDec);
+                
+            }
+            else if (index < 0) {
+                int incDec = numbers.get(0);
+                sum += incDec;
+                numbers.set(0, numbers.get(numbers.size() - 1));
+                numbers = raiseDecreaseSpecial(numbers, incDec);
+            } else {
+                numbers = raiseDecrease(numbers, index);
+                //System.out.println(numbers.toString().replaceAll("[\\[\\],]", ""));
+                sum += numbers.get(index);
+                numbers.remove(index);
+            }
+            //System.out.println(numbers.toString().replaceAll("[\\[\\],]", ""));
+        }
+        System.out.println(sum);
+    }
+
+    public void softuniCoursePlanning () {
+        List<String> input = Arrays.stream(scanner.nextLine().split(", ")).collect(Collectors.toList());
+
+        while (true) {
+            String s = scanner.nextLine();
+            if (s.equals("course start")) break;
+
+            String[] commands = s.split("\\:");
+            if(commands[0].equals("Add")) {
+                if(!input.contains(commands[1])) input.add(commands[1]);
+            }
+            else if (commands[0].equals("Insert")) {
+                int index = Integer.valueOf(commands[2]);
+                if(!input.contains(commands[1])) input.add(index, commands[1]);
+            }
+            else if (commands[0].equals("Remove")) {
+                String exercise = commands[1]+"-Exercise";
+                if(input.contains(commands[1])) input.remove(commands[1]);
+                if(input.contains(exercise)) input.remove(exercise);
+            }
+            else if (commands[0].equals("Swap")) {
+                String exercise1 = commands[1]+"-Exercise";
+                String exercise2 = commands[2]+"-Exercise";
+
+                if(input.contains(commands[1]) && input.contains(commands[2])) {
+                    String temp = commands[1];
+                    int index2 = input.indexOf(commands[2]);
+                    input.set(input.indexOf(commands[1]), commands[2]);
+                    input.set(index2, temp);
+                }
+                if(input.contains(exercise1)) {
+                    input.remove(input.indexOf(exercise1));
+                    input.add(input.indexOf(commands[1]) + 1, exercise1);
+
+                }
+                if(input.contains(exercise2)) {
+                    input.remove(input.indexOf(exercise2));
+                    input.add(input.indexOf(commands[2]) + 1, exercise2);
+                }
+            }
+            else if (commands[0].equals("Exercise")) {
+                if(input.contains(commands[1])) {
+                    String exercise = commands[1] + "-Exercise";
+                    input.add(input.indexOf(commands[1])+1, exercise);
+                }
+                else {
+                    String exercise = commands[1] + "-Exercise";
+                    input.add(commands[1]);
+                    input.add(exercise);
+                }
+            } 
+            //System.out.println(input.toString().replaceAll("[\\[\\],]", ""));
+        }
+        int i = 1;
+        for (String lesson : input) {
+            System.out.println(i+"."+lesson);
+            i++;
+        }
+    }
     public static void main(String[] args){
-        //ListsExercercise LE = new ListsExercercise();
-        //LE.appendArrays();
-        
+        ListsExercercise LE = new ListsExercercise();
+        LE.softuniCoursePlanning();
         
     }
 }
